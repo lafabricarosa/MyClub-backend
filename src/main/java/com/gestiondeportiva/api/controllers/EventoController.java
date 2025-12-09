@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +21,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/eventos")
-@CrossOrigin(origins = "http://localhost:4200")
 public class EventoController {
 
     private final EventoService eventoService;
@@ -30,11 +29,19 @@ public class EventoController {
         this.eventoService = eventoService;
     }
 
+    // ========================
+    //        CRUD
+    // ========================
+
+    // 🔍 Jugador, Entrenador y Admin pueden LISTAR (el servicio filtra)
+    @PreAuthorize("hasAnyRole('JUGADOR','ENTRENADOR','ADMIN')")
     @GetMapping
     public ResponseEntity<List<EventoDTO>> findAll(){
         return ResponseEntity.ok(eventoService.findAll());
     }
 
+    // 🔍 Jugador, Entrenador y Admin pueden ver un evento (el servicio filtra)
+    @PreAuthorize("hasAnyRole('JUGADOR','ENTRENADOR','ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<EventoDTO> findById(@PathVariable Long id){
         return eventoService.findById(id)
@@ -42,6 +49,8 @@ public class EventoController {
             .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // 🟢 Crear → solo ENTRENADOR y ADMIN
+    @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
     @PostMapping
     public ResponseEntity<EventoDTO> create(@Valid @RequestBody EventoDTO dto){
         EventoDTO guardado = eventoService.save(dto);
@@ -50,20 +59,19 @@ public class EventoController {
             .body(guardado);
     }
 
+    // 🟡 Actualizar → solo ENTRENADOR y ADMIN
+    @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<EventoDTO> update(@PathVariable Long id, @Valid @RequestBody EventoDTO dto){
         EventoDTO actualizado = eventoService.update(id, dto);
         return ResponseEntity.ok(actualizado);
     }
 
+    // 🔴 Eliminar → solo ENTRENADOR y ADMIN
+    @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id){
         eventoService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-
-    
-
-
-
 }

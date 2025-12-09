@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,7 +13,6 @@ import com.gestiondeportiva.api.services.EquipoService;
 
 import jakarta.validation.Valid;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/equipos")
-@CrossOrigin(origins = "http://localhost:4200")
 public class EquipoController {
 
     private final EquipoService equipoService;
@@ -46,6 +45,7 @@ public class EquipoController {
     }
 
     // Crear un equipo
+    @PreAuthorize("hasRole('ENTRENADOR')")
     @PostMapping
     public ResponseEntity<EquipoDTO> create(@Valid @RequestBody EquipoDTO dto) {
         EquipoDTO guardado = equipoService.save(dto);

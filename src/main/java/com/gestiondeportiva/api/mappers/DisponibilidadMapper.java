@@ -25,6 +25,9 @@ public interface DisponibilidadMapper {
     // ======= Entity → DTO =======
     @Mapping(target = "idJugador", source = "jugador.id")
     @Mapping(target = "nombreJugador", source = "jugador.nombre")
+    @Mapping(target = "apellidos", source = "jugador.apellidos")
+    @Mapping(target = "fotoUrl", source = "jugador.fotoUrl")
+    @Mapping(target = "posicion", source = "jugador.posicion")
     @Mapping(target = "idEvento", source = "evento.id")
     @Mapping(target = "descripcionEvento", source = "evento.descripcion")
     @Mapping(target = "fechaEvento", source = "evento.fecha")

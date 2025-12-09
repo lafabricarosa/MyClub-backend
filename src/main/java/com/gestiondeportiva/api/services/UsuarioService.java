@@ -30,6 +30,8 @@ public interface UsuarioService {
     List<UsuarioDTO> findByApellidos(String apellidos);
 
     List<UsuarioDTO> findByPosicion(Posicion posicion);
+
+    void cambiarPassword(Long id, String passwordActual, String passwordNueva);
 }
 
 

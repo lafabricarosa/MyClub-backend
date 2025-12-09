@@ -3,6 +3,8 @@ package com.gestiondeportiva.api.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +13,7 @@ import com.gestiondeportiva.api.entities.Categoria;
 import com.gestiondeportiva.api.entities.Equipo;
 import com.gestiondeportiva.api.mappers.EquipoMapper;
 import com.gestiondeportiva.api.repositories.EquipoRepository;
+import com.gestiondeportiva.api.security.SecurityUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -20,10 +23,13 @@ public class EquipoServiceImpl implements EquipoService {
 
     private final EquipoRepository equipoRepository;
     private final EquipoMapper equipoMapper;
+    private final SecurityUtils securityUtils;
 
-    public EquipoServiceImpl(EquipoRepository equipoRepository, EquipoMapper equipoMapper) {
+    public EquipoServiceImpl(EquipoRepository equipoRepository, EquipoMapper equipoMapper,
+            SecurityUtils securityUtils) {
         this.equipoRepository = equipoRepository;
         this.equipoMapper = equipoMapper;
+        this.securityUtils = securityUtils;
     }
 
     // ================== CRUD ==================
@@ -56,8 +62,17 @@ public class EquipoServiceImpl implements EquipoService {
         if (datosActualizados == null) {
             throw new IllegalArgumentException("Los datos actualizados no pueden ser nulos");
         }
+
         Equipo equipo = equipoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Equipo no encontrado con ID: " + id));
+
+        String emailActual = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+
+        // Verificar si el equipo tiene entrenador antes de comparar
+        if (equipo.getEntrenador() != null && !equipo.getEntrenador().getEmail().equals(emailActual)) {
+            throw new AccessDeniedException("No puedes editar equipos de otro entrenador");
+        }
 
         equipoMapper.updateEntityFromDTO(datosActualizados, equipo);
         Equipo actualizado = equipoRepository.save(equipo);
