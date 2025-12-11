@@ -8,8 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.gestiondeportiva.api.dto.EstadisticaDTO;
 import com.gestiondeportiva.api.entities.Estadistica;
+import com.gestiondeportiva.api.entities.Usuario;
+import com.gestiondeportiva.api.entities.Evento;
 import com.gestiondeportiva.api.mappers.EstadisticaMapper;
 import com.gestiondeportiva.api.repositories.EstadisticaRepository;
+import com.gestiondeportiva.api.repositories.UsuarioRepository;
+import com.gestiondeportiva.api.repositories.EventoRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -19,10 +23,17 @@ public class EstadisticaServiceImpl implements EstadisticaService {
 
     private final EstadisticaRepository estadisticaRepository;
     private final EstadisticaMapper estadisticaMapper;
+    private final UsuarioRepository usuarioRepository;
+    private final EventoRepository eventoRepository;
 
-    public EstadisticaServiceImpl(EstadisticaRepository estadisticaRepository, EstadisticaMapper estadisticaMapper) {
+    public EstadisticaServiceImpl(EstadisticaRepository estadisticaRepository,
+                                   EstadisticaMapper estadisticaMapper,
+                                   UsuarioRepository usuarioRepository,
+                                   EventoRepository eventoRepository) {
         this.estadisticaRepository = estadisticaRepository;
         this.estadisticaMapper = estadisticaMapper;
+        this.usuarioRepository = usuarioRepository;
+        this.eventoRepository = eventoRepository;
     }
 
     // ================== CRUD ==================
@@ -60,7 +71,23 @@ public class EstadisticaServiceImpl implements EstadisticaService {
             throw new IllegalArgumentException("Debe indicar la cantidad de tarjetas rojas");
         }
 
-        Estadistica estadistica = estadisticaMapper.toEntity(estadisticaDTO);
+        // Buscar las entidades reales desde la base de datos
+        Usuario jugador = usuarioRepository.findById(estadisticaDTO.getIdJugador())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Jugador no encontrado con ID: " + estadisticaDTO.getIdJugador()));
+
+        Evento evento = eventoRepository.findById(estadisticaDTO.getIdEvento())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Evento no encontrado con ID: " + estadisticaDTO.getIdEvento()));
+
+        // Crear la estadística con las entidades reales
+        Estadistica estadistica = new Estadistica();
+        estadistica.setJugador(jugador);
+        estadistica.setEvento(evento);
+        estadistica.setGoles(estadisticaDTO.getGoles());
+        estadistica.setTarjetasAmarillas(estadisticaDTO.getTarjetasAmarillas());
+        estadistica.setTarjetasRojas(estadisticaDTO.getTarjetasRojas());
+
         Estadistica guardada = estadisticaRepository.save(estadistica);
         return estadisticaMapper.toDTO(guardada);
     }
@@ -71,10 +98,36 @@ public class EstadisticaServiceImpl implements EstadisticaService {
         if (datosActualizados == null) {
             throw new IllegalArgumentException("Los datos actualizados no pueden ser nulos");
         }
+
         Estadistica estadistica = estadisticaRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Estadística no encontrada con ID: " + id));
-                
-        estadisticaMapper.updateEntityFromDTO(datosActualizados, estadistica);
+
+        // Actualizar las relaciones si se proporcionan nuevos IDs
+        if (datosActualizados.getIdJugador() != null) {
+            Usuario jugador = usuarioRepository.findById(datosActualizados.getIdJugador())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Jugador no encontrado con ID: " + datosActualizados.getIdJugador()));
+            estadistica.setJugador(jugador);
+        }
+
+        if (datosActualizados.getIdEvento() != null) {
+            Evento evento = eventoRepository.findById(datosActualizados.getIdEvento())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Evento no encontrado con ID: " + datosActualizados.getIdEvento()));
+            estadistica.setEvento(evento);
+        }
+
+        // Actualizar las estadísticas numéricas
+        if (datosActualizados.getGoles() != null) {
+            estadistica.setGoles(datosActualizados.getGoles());
+        }
+        if (datosActualizados.getTarjetasAmarillas() != null) {
+            estadistica.setTarjetasAmarillas(datosActualizados.getTarjetasAmarillas());
+        }
+        if (datosActualizados.getTarjetasRojas() != null) {
+            estadistica.setTarjetasRojas(datosActualizados.getTarjetasRojas());
+        }
+
         Estadistica actualizada = estadisticaRepository.save(estadistica);
         return estadisticaMapper.toDTO(actualizada);
     }
