@@ -80,13 +80,26 @@ public class EstadisticaServiceImpl implements EstadisticaService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Evento no encontrado con ID: " + estadisticaDTO.getIdEvento()));
 
-        // Crear la estadística con las entidades reales
-        Estadistica estadistica = new Estadistica();
-        estadistica.setJugador(jugador);
-        estadistica.setEvento(evento);
-        estadistica.setGoles(estadisticaDTO.getGoles());
-        estadistica.setTarjetasAmarillas(estadisticaDTO.getTarjetasAmarillas());
-        estadistica.setTarjetasRojas(estadisticaDTO.getTarjetasRojas());
+        // Verificar si ya existe una estadística para este jugador en este evento
+        Optional<Estadistica> estadisticaExistente = estadisticaRepository
+                .findByEventoIdAndJugadorId(estadisticaDTO.getIdEvento(), estadisticaDTO.getIdJugador());
+
+        Estadistica estadistica;
+        if (estadisticaExistente.isPresent()) {
+            // Si existe, actualizarla
+            estadistica = estadisticaExistente.get();
+            estadistica.setGoles(estadisticaDTO.getGoles());
+            estadistica.setTarjetasAmarillas(estadisticaDTO.getTarjetasAmarillas());
+            estadistica.setTarjetasRojas(estadisticaDTO.getTarjetasRojas());
+        } else {
+            // Si no existe, crear una nueva
+            estadistica = new Estadistica();
+            estadistica.setJugador(jugador);
+            estadistica.setEvento(evento);
+            estadistica.setGoles(estadisticaDTO.getGoles());
+            estadistica.setTarjetasAmarillas(estadisticaDTO.getTarjetasAmarillas());
+            estadistica.setTarjetasRojas(estadisticaDTO.getTarjetasRojas());
+        }
 
         Estadistica guardada = estadisticaRepository.save(estadistica);
         return estadisticaMapper.toDTO(guardada);
