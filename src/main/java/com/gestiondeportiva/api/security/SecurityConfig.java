@@ -61,11 +61,18 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // AÑADE ESTE MÉTODO
+    // CONFIGURACIÓN CORS
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+
+        // Permitir orígenes específicos (frontend en Vercel y localhost para desarrollo)
+        configuration.setAllowedOrigins(Arrays.asList(
+            "https://my-club-frontend.vercel.app",
+            "http://localhost:4200",
+            "http://localhost:8080"
+        ));
+
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
@@ -74,6 +81,6 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-        return (CorsConfigurationSource) source;
+        return source;
     }
 }
