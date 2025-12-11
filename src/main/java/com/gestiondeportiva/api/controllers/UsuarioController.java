@@ -23,7 +23,7 @@ import com.gestiondeportiva.api.dto.UsuarioDTO;
 import com.gestiondeportiva.api.entities.Usuario;
 import com.gestiondeportiva.api.mappers.UsuarioMapper;
 import com.gestiondeportiva.api.repositories.UsuarioRepository;
-import com.gestiondeportiva.api.services.FileStorageService;
+import com.gestiondeportiva.api.services.CloudinaryService;
 import com.gestiondeportiva.api.services.UsuarioService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -36,16 +36,16 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
-    private final FileStorageService fileStorageService;
+    private final CloudinaryService cloudinaryService;
 
     public UsuarioController(UsuarioService usuarioService,
                             UsuarioRepository usuarioRepository,
                             UsuarioMapper usuarioMapper,
-                            FileStorageService fileStorageService) {
+                            CloudinaryService cloudinaryService) {
         this.usuarioService = usuarioService;
         this.usuarioRepository = usuarioRepository;
         this.usuarioMapper = usuarioMapper;
-        this.fileStorageService = fileStorageService;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
@@ -109,24 +109,16 @@ public class UsuarioController {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
 
-        // Eliminar la foto anterior si existe
+        // Eliminar la foto anterior de Cloudinary si existe
         if (usuario.getFotoUrl() != null && !usuario.getFotoUrl().isEmpty()) {
-            // Extraer el nombre del archivo de la URL
-            String oldFileName = usuario.getFotoUrl().substring(usuario.getFotoUrl().lastIndexOf("/") + 1);
-            fileStorageService.eliminarArchivo(oldFileName);
+            cloudinaryService.eliminarImagen(usuario.getFotoUrl());
         }
 
-        // Guardar el nuevo archivo
-        String fileName = fileStorageService.guardarArchivo(file);
-
-        // Construir la URL completa del archivo
-        String fileUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/uploads/fotos-perfil/")
-                .path(fileName)
-                .toUriString();
+        // Subir la nueva imagen a Cloudinary
+        String imageUrl = cloudinaryService.subirImagen(file, "myclub/fotos-perfil");
 
         // Actualizar la URL de la foto en el usuario
-        usuario.setFotoUrl(fileUrl);
+        usuario.setFotoUrl(imageUrl);
         Usuario actualizado = usuarioRepository.save(usuario);
 
         return ResponseEntity.ok(usuarioMapper.toDTO(actualizado));
