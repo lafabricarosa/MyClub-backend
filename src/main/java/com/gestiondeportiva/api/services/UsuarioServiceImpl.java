@@ -20,6 +20,30 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementación del servicio de gestión de usuarios con control de acceso basado en roles.
+ * <p>
+ * Proporciona toda la lógica de negocio para usuarios, incluyendo:
+ * </p>
+ * <ul>
+ *   <li>Operaciones CRUD con validación de permisos</li>
+ *   <li>Encriptación automática de contraseñas con BCrypt</li>
+ *   <li>Control de acceso basado en roles (RBAC):
+ *     <ul>
+ *       <li><strong>ADMIN:</strong> Acceso total sin restricciones</li>
+ *       <li><strong>ENTRENADOR:</strong> Solo gestiona jugadores de su equipo</li>
+ *       <li><strong>JUGADOR:</strong> Solo puede ver y editar su propio perfil</li>
+ *     </ul>
+ *   </li>
+ *   <li>Validación de email único en el sistema</li>
+ *   <li>Cambio seguro de contraseñas con verificación</li>
+ * </ul>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see UsuarioService
+ * @see SecurityUtils
+ */
 @Service
 @Transactional
 public class UsuarioServiceImpl implements UsuarioService {
@@ -41,6 +65,17 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     // ================== CRUD ==================
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <strong>Control de acceso implementado:</strong>
+     * </p>
+     * <ul>
+     *   <li>ADMIN: Devuelve todos los usuarios del sistema sin restricciones</li>
+     *   <li>ENTRENADOR: Solo devuelve jugadores de su equipo</li>
+     *   <li>JUGADOR: Acceso denegado</li>
+     * </ul>
+     */
     @Override
     @Transactional(readOnly = true)
     public List<UsuarioDTO> findAll() {
@@ -62,6 +97,28 @@ public class UsuarioServiceImpl implements UsuarioService {
         throw new AccessDeniedException("No puedes ver todos los usuarios");
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <strong>Lógica de creación:</strong>
+     * </p>
+     * <ol>
+     *   <li>Valida que el email no esté ya registrado en el sistema</li>
+     *   <li>Verifica permisos según el rol del usuario autenticado:
+     *     <ul>
+     *       <li>ADMIN: Puede crear usuarios con cualquier rol</li>
+     *       <li>ENTRENADOR: Solo puede crear JUGADORES de su propio equipo</li>
+     *       <li>JUGADOR: No puede crear usuarios</li>
+     *     </ul>
+     *   </li>
+     *   <li>Asigna automáticamente el equipo del entrenador si es un entrenador quien crea</li>
+     *   <li>Encripta la contraseña con BCrypt antes de guardar</li>
+     *   <li>Convierte a DTO antes de retornar</li>
+     * </ol>
+     *
+     * @throws IllegalArgumentException si el email ya existe
+     * @throws AccessDeniedException si el usuario no tiene permisos para crear usuarios
+     */
     @Override
     @Transactional
     public UsuarioDTO save(UsuarioCreateDTO nuevoUsuario) {
@@ -316,6 +373,24 @@ public class UsuarioServiceImpl implements UsuarioService {
                         .toList());
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <strong>Proceso de cambio de contraseña:</strong>
+     * </p>
+     * <ol>
+     *   <li>Busca el usuario por ID</li>
+     *   <li>Verifica que la contraseña actual sea correcta usando BCrypt</li>
+     *   <li>Valida que la nueva contraseña no esté vacía</li>
+     *   <li>Valida longitud mínima de 6 caracteres</li>
+     *   <li>Encripta la nueva contraseña con BCrypt</li>
+     *   <li>Guarda el usuario actualizado</li>
+     * </ol>
+     *
+     * @throws EntityNotFoundException si el usuario no existe
+     * @throws IllegalArgumentException si la contraseña actual es incorrecta, la nueva está vacía
+     *                                  o tiene menos de 6 caracteres
+     */
     @Override
     @Transactional
     public void cambiarPassword(Long id, String passwordActual, String passwordNueva) {

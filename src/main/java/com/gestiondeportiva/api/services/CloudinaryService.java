@@ -10,11 +10,37 @@ import org.springframework.web.multipart.MultipartFile;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
+/**
+ * Servicio para la gestión de imágenes en Cloudinary.
+ * <p>
+ * Proporciona funcionalidades para subir, transformar y eliminar imágenes
+ * en el servicio cloud de Cloudinary. Las imágenes se optimizan automáticamente
+ * (tamaño, calidad, formato) antes de almacenarlas.
+ * </p>
+ *
+ * <p><strong>Configuración:</strong></p>
+ * <ul>
+ *   <li>Tamaño máximo de imagen: 500x500px (manteniendo aspecto)</li>
+ *   <li>Calidad: automática (optimizada por Cloudinary)</li>
+ *   <li>Formato: automático (WebP cuando el navegador lo soporte)</li>
+ *   <li>Conexión: HTTPS segura</li>
+ * </ul>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ */
 @Service
 public class CloudinaryService {
 
     private final Cloudinary cloudinary;
 
+    /**
+     * Constructor que inicializa el cliente de Cloudinary con las credenciales.
+     *
+     * @param cloudName nombre del cloud de Cloudinary
+     * @param apiKey clave API de Cloudinary
+     * @param apiSecret secreto API de Cloudinary
+     */
     public CloudinaryService(
             @Value("${cloudinary.cloud-name}") String cloudName,
             @Value("${cloudinary.api-key}") String apiKey,
@@ -28,7 +54,17 @@ public class CloudinaryService {
     }
 
     /**
-     * Sube una imagen a Cloudinary y retorna la URL de la imagen
+     * Sube una imagen a Cloudinary y retorna la URL segura de la imagen.
+     * <p>
+     * Valida que el archivo sea una imagen y no esté vacío. Aplica transformaciones
+     * automáticas para optimizar el tamaño, calidad y formato.
+     * </p>
+     *
+     * @param file archivo MultipartFile con la imagen
+     * @param folder carpeta destino en Cloudinary
+     * @return URL segura (HTTPS) de la imagen subida
+     * @throws IllegalArgumentException si el archivo está vacío o no es una imagen
+     * @throws RuntimeException si hay un error durante la subida
      */
     public String subirImagen(MultipartFile file, String folder) {
         // Validar que el archivo no esté vacío

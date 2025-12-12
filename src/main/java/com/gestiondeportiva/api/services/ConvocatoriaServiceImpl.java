@@ -13,6 +13,17 @@ import com.gestiondeportiva.api.repositories.ConvocatoriaRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
+/**
+ * Implementación del servicio de gestión de convocatorias de jugadores.
+ * <p>
+ * Proporciona la lógica de negocio para convocatorias, permitiendo
+ * gestionar qué jugadores son convocados para eventos y si son titulares o suplentes.
+ * </p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see ConvocatoriaService
+ */
 @Service
 @Transactional
 public class ConvocatoriaServiceImpl implements ConvocatoriaService {

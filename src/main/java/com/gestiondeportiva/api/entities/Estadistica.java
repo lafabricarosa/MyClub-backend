@@ -13,38 +13,72 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * Entidad JPA que representa las estadísticas de un jugador en un evento específico.
+ * <p>
+ * Registra el rendimiento individual de un jugador durante un partido o entrenamiento,
+ * incluyendo goles marcados, tarjetas amarillas y tarjetas rojas recibidas.
+ * </p>
+ *
+ * <p>El sistema implementa lógica de <strong>upsert</strong> (update or insert) para
+ * evitar duplicados: si ya existe una estadística para un jugador en un evento,
+ * se actualiza; si no existe, se crea una nueva.</p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see Evento
+ * @see Usuario
+ */
 @Entity
 @Table(name = "estadisticas")
 public class Estadistica {
 
+    /** Identificador único de la estadística */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Evento en el que se registró la estadística */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_evento", nullable = false)
     @JsonIgnoreProperties("estadisticas")
     @NotNull(message = "Debe indicar el evento asociado")
     private Evento evento;
 
+    /** Jugador al que pertenece la estadística */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_jugador", nullable = false)
     @JsonIgnoreProperties("estadisticas")
     @NotNull(message = "Debe indicar el jugador asociado")
     private Usuario jugador;
 
+    /** Número de goles marcados por el jugador */
     @Column(nullable = false)
     private int goles = 0;
 
+    /** Número de tarjetas amarillas recibidas */
     @Column(name = "tarjetas_amarillas", nullable = false)
     private int tarjetasAmarillas = 0;
 
+    /** Número de tarjetas rojas recibidas */
     @Column(name = "tarjetas_rojas", nullable = false)
     private int tarjetasRojas = 0;
 
+    /**
+     * Constructor por defecto.
+     */
     public Estadistica() {
     }
 
+    /**
+     * Constructor con todos los campos.
+     *
+     * @param evento Evento asociado a la estadística
+     * @param jugador Jugador asociado a la estadística
+     * @param goles Número de goles marcados
+     * @param tarjetasAmarillas Número de tarjetas amarillas
+     * @param tarjetasRojas Número de tarjetas rojas
+     */
     public Estadistica(Evento evento, Usuario jugador, Integer goles, Integer tarjetasAmarillas,
             Integer tarjetasRojas) {
         this.evento = evento;

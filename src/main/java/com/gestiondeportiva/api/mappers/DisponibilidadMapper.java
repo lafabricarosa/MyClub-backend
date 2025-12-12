@@ -16,13 +16,34 @@ import com.gestiondeportiva.api.entities.Disponibilidad;
 import com.gestiondeportiva.api.entities.Evento;
 import com.gestiondeportiva.api.entities.Usuario;
 
-@Mapper(componentModel = "spring", 
+/**
+ * Mapper de MapStruct para la conversión entre entidad Disponibilidad y DisponibilidadDTO.
+ * <p>
+ * Gestiona las conversiones de disponibilidad de jugadores para eventos, incluyendo
+ * información extendida del jugador (nombre, apellidos, foto, posición) y del evento.
+ * </p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see Disponibilidad
+ * @see DisponibilidadDTO
+ */
+@Mapper(componentModel = "spring",
     unmappedTargetPolicy = ReportingPolicy.IGNORE,
     nullValueMappingStrategy = NullValueMappingStrategy.RETURN_NULL)
 
 public interface DisponibilidadMapper {
 
-    // ======= Entity → DTO =======
+    /**
+     * Convierte una entidad Disponibilidad a DisponibilidadDTO.
+     * <p>
+     * Desnormaliza múltiples campos del jugador (nombre, apellidos, foto, posición)
+     * y del evento para una visualización completa sin consultas adicionales.
+     * </p>
+     *
+     * @param disponibilidad entidad Disponibilidad a convertir
+     * @return DisponibilidadDTO con información completa del jugador y evento
+     */
     @Mapping(target = "idJugador", source = "jugador.id")
     @Mapping(target = "nombreJugador", source = "jugador.nombre")
     @Mapping(target = "apellidos", source = "jugador.apellidos")
@@ -33,21 +54,44 @@ public interface DisponibilidadMapper {
     @Mapping(target = "fechaEvento", source = "evento.fecha")
     DisponibilidadDTO toDTO(Disponibilidad disponibilidad);
 
-    // ======= Lista de entidades → Lista de DTOs =======
+    /**
+     * Convierte una lista de entidades Disponibilidad a lista de DisponibilidadDTO.
+     *
+     * @param disponibilidad lista de entidades Disponibilidad
+     * @return lista de DisponibilidadDTO
+     */
     List<DisponibilidadDTO> toDTOList(List<Disponibilidad> disponibilidad);
 
-    // ======= DTO → Entity =======
+    /**
+     * Convierte un DisponibilidadDTO a entidad Disponibilidad.
+     *
+     * @param dto DisponibilidadDTO con los datos
+     * @return entidad Disponibilidad con relaciones JPA establecidas
+     */
     @Mapping(source = "idEvento", target = "evento", qualifiedByName = "mapEvento")
     @Mapping(source = "idJugador", target = "jugador", qualifiedByName = "mapJugador")
     Disponibilidad toEntity(DisponibilidadDTO dto);
 
-    // ======= Actualizar entidad existente con datos del DTO (flexible) =======
+    /**
+     * Actualiza una entidad Disponibilidad existente con datos del DTO.
+     * <p>
+     * Solo actualiza campos no nulos del DTO, útil para cambios de estado de disponibilidad.
+     * </p>
+     *
+     * @param dto DisponibilidadDTO con los datos a actualizar
+     * @param entity entidad Disponibilidad existente que será modificada
+     */
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(source = "idEvento", target = "evento", qualifiedByName = "mapEvento")
     @Mapping(source = "idJugador", target = "jugador", qualifiedByName = "mapJugador")
     void updateEntityFromDTO(DisponibilidadDTO dto, @MappingTarget Disponibilidad entity);
 
-    // ======= Métodos auxiliares =======
+    /**
+     * Método auxiliar para mapear un ID de evento a entidad Evento proxy.
+     *
+     * @param id ID del evento
+     * @return entidad Evento proxy, o null si el ID es null
+     */
     @Named("mapEvento")
     default Evento mapEvento(Long id) {
         if (id == null)
@@ -57,6 +101,12 @@ public interface DisponibilidadMapper {
         return evento;
     }
 
+    /**
+     * Método auxiliar para mapear un ID de jugador a entidad Usuario proxy.
+     *
+     * @param id ID del jugador
+     * @return entidad Usuario proxy, o null si el ID es null
+     */
     @Named("mapJugador")
     default Usuario mapJugador(Long id) {
         if (id == null)

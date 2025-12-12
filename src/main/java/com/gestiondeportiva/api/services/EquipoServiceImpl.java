@@ -17,6 +17,17 @@ import com.gestiondeportiva.api.security.SecurityUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
+/**
+ * Implementación del servicio de gestión de equipos deportivos.
+ * <p>
+ * Proporciona la lógica de negocio para equipos con validaciones y control de acceso.
+ * Los entrenadores solo pueden editar sus propios equipos.
+ * </p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see EquipoService
+ */
 @Service
 @Transactional
 public class EquipoServiceImpl implements EquipoService {

@@ -14,6 +14,17 @@ import com.gestiondeportiva.api.repositories.CuotaRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
+/**
+ * Implementación del servicio de gestión de cuotas de pago.
+ * <p>
+ * Proporciona la lógica de negocio para la gestión económica de cuotas de jugadores,
+ * permitiendo crear, actualizar y consultar cuotas por estado (pendiente, pagado, exento).
+ * </p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see CuotaService
+ */
 @Service
 @Transactional
 public class CuotaServiceImpl implements CuotaService {

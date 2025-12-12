@@ -12,31 +12,60 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * Entidad JPA que representa la convocatoria de un jugador para un evento.
+ * <p>
+ * Una convocatoria vincula a un jugador específico con un evento (partido, entrenamiento
+ * o reunión) e indica si el jugador es titular o suplente.
+ * </p>
+ *
+ * <p>El entrenador crea las convocatorias para cada evento, seleccionando qué jugadores
+ * participarán y cuáles serán titulares.</p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see Evento
+ * @see Usuario
+ */
 @Entity
 @Table(name = "convocatorias")
 public class Convocatoria {
 
+    /** Identificador único de la convocatoria */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Evento para el cual se convoca al jugador */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_evento", nullable = false)
     @JsonIgnoreProperties("convocatorias")
     @NotNull(message = "Debe indicar el evento de la convocatoria")
     private Evento evento;
 
+    /** Jugador convocado para el evento */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_jugador", nullable = false)
     @JsonIgnoreProperties("convocatorias")
     @NotNull(message = "Debe indicar el jugador convocado")
     private Usuario jugador;
 
+    /** Indica si el jugador es titular (true) o suplente (false) */
     private Boolean titular;
 
+    /**
+     * Constructor por defecto.
+     */
     public Convocatoria() {
     }
 
+    /**
+     * Constructor con todos los campos.
+     *
+     * @param evento Evento para el que se convoca
+     * @param jugador Jugador convocado
+     * @param titular Indica si es titular o suplente
+     */
     public Convocatoria(Evento evento, Usuario jugador, Boolean titular) {
         this.evento = evento;
         this.jugador = jugador;

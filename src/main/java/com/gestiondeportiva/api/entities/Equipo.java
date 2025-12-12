@@ -19,33 +19,59 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 
+/**
+ * Entidad JPA que representa un equipo deportivo en el sistema.
+ * <p>
+ * Un equipo agrupa a un conjunto de jugadores bajo la dirección de un entrenador
+ * y pertenece a una categoría específica (SENIOR, JUVENIL, CADETE, etc.).
+ * Los equipos tienen asociados eventos (partidos, entrenamientos, reuniones).
+ * </p>
+ *
+ * <p>La relación con el entrenador es {@code OneToOne}, lo que significa que
+ * cada equipo tiene un único entrenador y cada entrenador gestiona un único equipo.</p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see Categoria
+ * @see Usuario
+ * @see Evento
+ */
 @Entity
 @Table(name = "equipos")
 public class Equipo {
 
+    /** Identificador único del equipo */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Nombre del equipo (obligatorio) */
     @NotBlank(message = "El nombre del equipo no puede estar vacío")
     private String nombre;
 
+    /** Categoría del equipo según la edad de los jugadores */
     @Enumerated(EnumType.STRING)
     private Categoria categoria;
 
+    /** Entrenador que dirige el equipo (relación uno a uno) */
     @OneToOne
     @JoinColumn(name = "entrenador_id")
     @JsonIgnoreProperties("equipo")
     private Usuario entrenador;
 
+    /** Conjunto de jugadores que forman parte del equipo */
     @OneToMany(mappedBy = "equipo", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("equipo")
     private Set<Usuario> jugadores;
 
+    /** Eventos (partidos, entrenamientos, reuniones) del equipo */
     @OneToMany(mappedBy = "equipo", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("equipo")
     private Set<Evento> eventos;
 
+    /**
+     * Constructor por defecto que inicializa las colecciones vacías.
+     */
     public Equipo() {
         this.jugadores = new HashSet<>();
         this.eventos = new HashSet<>();

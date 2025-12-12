@@ -15,36 +15,73 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * Entidad JPA que representa la disponibilidad de un jugador para asistir a un evento.
+ * <p>
+ * Los jugadores pueden indicar si pueden asistir a un evento (partido, entrenamiento
+ * o reunión) mediante tres estados posibles:
+ * <ul>
+ *   <li>{@code ASISTE}: El jugador confirma su asistencia</li>
+ *   <li>{@code NO_ASISTE}: El jugador no puede asistir</li>
+ *   <li>{@code DUDA}: El jugador aún no está seguro de su asistencia</li>
+ * </ul>
+ * </p>
+ *
+ * <p>Opcionalmente, el jugador puede añadir un comentario explicando su disponibilidad
+ * (ej: "Tengo examen", "Lesionado", "Llegaré tarde").</p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see Evento
+ * @see Usuario
+ * @see EstadoDisponibilidad
+ */
 @Entity
 @Table(name = "disponibilidades")
 public class Disponibilidad {
 
+    /** Identificador único de la disponibilidad */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Evento para el que se registra la disponibilidad */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_evento", nullable = false)
     @JsonIgnoreProperties("disponibilidades")
     @NotNull(message = "Debe indicar el evento")
     private Evento evento;
 
+    /** Jugador que registra su disponibilidad */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_jugador", nullable = false)
     @JsonIgnoreProperties("disponibilidades")
     @NotNull(message = "Debe indicar el jugador")
     private Usuario jugador;
 
+    /** Estado de disponibilidad del jugador (ASISTE, NO_ASISTE, DUDA) */
     @Column(name = "estado")
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Debe indicar la disponibilidad")
     private EstadoDisponibilidad estadoDisponibilidad;
 
+    /** Comentario opcional del jugador sobre su disponibilidad */
     private String comentario;
 
+    /**
+     * Constructor por defecto.
+     */
     public Disponibilidad() {
     }
 
+    /**
+     * Constructor con todos los campos.
+     *
+     * @param evento Evento para el que se registra la disponibilidad
+     * @param jugador Jugador que registra su disponibilidad
+     * @param estadoDisponibilidad Estado de disponibilidad
+     * @param comentario Comentario opcional
+     */
     public Disponibilidad(Evento evento, Usuario jugador, EstadoDisponibilidad estadoDisponibilidad,
             String comentario) {
         this.evento = evento;

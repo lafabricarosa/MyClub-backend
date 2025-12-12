@@ -17,35 +17,73 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * Entidad JPA que representa una cuota de pago de un jugador.
+ * <p>
+ * Las cuotas permiten gestionar los pagos periódicos o puntuales de los jugadores,
+ * como mensualidades, material deportivo, inscripciones a torneos, etc.
+ * </p>
+ *
+ * <p>Cada cuota tiene un concepto, un importe y un estado que puede ser:
+ * <ul>
+ *   <li>{@code PENDIENTE}: Cuota sin pagar</li>
+ *   <li>{@code PAGADO}: Cuota abonada (incluye fecha de pago)</li>
+ *   <li>{@code EXENTO}: Jugador exento de pagar esta cuota</li>
+ * </ul>
+ * </p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see Usuario
+ * @see EstadoCuota
+ */
 @Entity
 @Table(name = "cuotas")
 public class Cuota {
 
+    /** Identificador único de la cuota */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Jugador al que pertenece la cuota */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_jugador", nullable = false)
     @JsonIgnoreProperties("cuotas")
     @NotNull(message = "Debe indicar el jugador asociado a la cuota")
     private Usuario jugador;
 
+    /** Concepto o descripción de la cuota (ej: "Mensualidad Enero", "Equipación") */
     private String concepto;
 
+    /** Importe de la cuota en euros */
     @Column(nullable = false)
     @NotNull(message = "Debe indicar el importe de la cuota")
     private Double importe=0.0;
 
+    /** Estado actual de la cuota (PENDIENTE, PAGADO, EXENTO) */
     @Column(name = "estado", nullable = false)
     @Enumerated(EnumType.STRING)
     private EstadoCuota estadoCuota;
 
+    /** Fecha en la que se realizó el pago (null si está pendiente o exento) */
     private LocalDate fechaPago;
 
+    /**
+     * Constructor por defecto.
+     */
     public Cuota() {
     }
 
+    /**
+     * Constructor con todos los campos.
+     *
+     * @param jugador Jugador al que pertenece la cuota
+     * @param concepto Concepto o descripción de la cuota
+     * @param importe Importe de la cuota en euros
+     * @param estadoCuota Estado de la cuota
+     * @param fechaPago Fecha de pago (puede ser null)
+     */
     public Cuota(Usuario jugador, String concepto, Double importe, EstadoCuota estadoCuota, LocalDate fechaPago) {
         this.jugador = jugador;
         this.concepto = concepto;

@@ -3,17 +3,56 @@ package com.gestiondeportiva.api.dto;
 import com.gestiondeportiva.api.entities.Posicion;
 import com.gestiondeportiva.api.entities.Rol;
 
+/**
+ * DTO (Data Transfer Object) para transferir datos de usuarios en respuestas API.
+ * <p>
+ * Representa la información de un usuario del sistema, excluyendo datos sensibles
+ * como la contraseña. Utilizado principalmente en operaciones de consulta donde
+ * se requiere enviar información del usuario al frontend de forma segura.
+ * </p>
+ *
+ * <p><strong>Ventajas del uso de DTOs:</strong></p>
+ * <ul>
+ *   <li>Seguridad: Oculta la contraseña y otros datos sensibles de la entidad</li>
+ *   <li>Eficiencia: Reduce el tamaño de las respuestas al excluir información innecesaria</li>
+ *   <li>Desacoplamiento: Separa la capa de persistencia de la capa de presentación</li>
+ *   <li>Desnormalización: Incluye {@code nombreEquipo} para evitar consultas adicionales</li>
+ * </ul>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see com.gestiondeportiva.api.entities.Usuario
+ */
 public class UsuarioDTO {
 
+    /** Identificador único del usuario */
     private Long id;
+
+    /** Nombre del usuario */
     private String nombre;
+
+    /** Apellidos del usuario */
     private String apellidos;
+
+    /** Dirección de correo electrónico (único en el sistema) */
     private String email;
+
+    /** Rol del usuario en el sistema (ADMIN, ENTRENADOR, JUGADOR) */
     private Rol rol;
+
+    /** Posición de juego (solo aplicable a jugadores) */
     private Posicion posicion;
+
+    /** Número de teléfono de contacto */
     private String telefono;
+
+    /** URL de la foto de perfil almacenada en Cloudinary */
     private String fotoUrl;
+
+    /** ID del equipo al que pertenece */
     private Long idEquipo;
+
+    /** Nombre del equipo (desnormalizado para evitar consultas adicionales) */
     private String nombreEquipo;
 
     public UsuarioDTO() {

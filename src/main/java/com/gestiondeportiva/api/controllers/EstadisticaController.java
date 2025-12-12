@@ -19,62 +19,100 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gestiondeportiva.api.dto.EstadisticaDTO;
 
-// Indica que esta clase es un controlador REST, manejará solicitudes HTTP (GET, POST, PUT, DELETE, etc.)
+/**
+ * Controlador REST para la gestión de estadísticas de jugadores.
+ * <p>
+ * Maneja operaciones CRUD para estadísticas de rendimiento de jugadores en eventos
+ * (goles, tarjetas amarillas y rojas). El servicio implementa lógica de upsert
+ * para prevenir duplicados de estadísticas del mismo jugador en el mismo evento.
+ * </p>
+ *
+ * <p><strong>Endpoints:</strong></p>
+ * <ul>
+ *   <li>GET /api/estadisticas - Lista todas las estadísticas</li>
+ *   <li>GET /api/estadisticas/{id} - Obtiene una estadística por ID</li>
+ *   <li>POST /api/estadisticas - Crea/actualiza estadística (upsert)</li>
+ *   <li>PUT /api/estadisticas/{id} - Actualiza una estadística</li>
+ *   <li>DELETE /api/estadisticas/{id} - Elimina una estadística</li>
+ * </ul>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see EstadisticaService
+ */
 @RestController
-// Define la ruta base para todas las peticiones que manejará este controlador.
 @RequestMapping("/api/estadisticas")
 public class EstadisticaController {
 
-    // Servicio que contiene la lógica de negocio relacionada con las estadísticas
     private final EstadisticaService estadisticaService;
 
-    // Constructor que inyecta el servicio (inyección de dependencias)
     public EstadisticaController(EstadisticaService estadisticaService){
         this.estadisticaService = estadisticaService;
     }
 
-    // Devuelve una lista con todas las estadísticas registradas
-    @GetMapping 
+    /**
+     * Lista todas las estadísticas del sistema.
+     *
+     * @return ResponseEntity con lista de EstadisticaDTO y código 200
+     */
+    @GetMapping
     public ResponseEntity<List<EstadisticaDTO>> findAll(){
-        // ResponseEntity.ok() devuelve una respuesta HTTP 200 con el cuerpo que se pasa
         return ResponseEntity.ok(estadisticaService.findAll());
     }
 
-    // Busca una estadística específica por su ID
-    @GetMapping("/{id}") 
+    /**
+     * Obtiene una estadística por su ID.
+     *
+     * @param id ID de la estadística
+     * @return ResponseEntity con EstadisticaDTO y código 200 si existe, 404 si no
+     */
+    @GetMapping("/{id}")
     public ResponseEntity<EstadisticaDTO> findById(@PathVariable Long id){
-        // Usa Optional para manejar el caso en que no se encuentre la estadística
         return estadisticaService.findById(id)
-            .map(estadistica -> ResponseEntity.ok(estadistica))  // Si existe, devuelve 200 OK con el dato
-            .orElseGet(() -> ResponseEntity.notFound().build()); // Si no existe, devuelve 404 Not Found
+            .map(estadistica -> ResponseEntity.ok(estadistica))
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Crea una nueva estadística en la base de datos
-    @PostMapping 
+    /**
+     * Crea o actualiza una estadística con lógica de upsert.
+     * <p>
+     * Si ya existe una estadística para ese jugador en ese evento, la actualiza.
+     * Si no existe, crea una nueva. Esto previene duplicados.
+     * </p>
+     *
+     * @param dto datos de la estadística con validaciones
+     * @return ResponseEntity con EstadisticaDTO creada/actualizada y código 201
+     */
+    @PostMapping
     public ResponseEntity<EstadisticaDTO> create(@Valid @RequestBody EstadisticaDTO dto){
-        // Guarda la nueva estadística y la devuelve
         EstadisticaDTO guardada = estadisticaService.save(dto);
-        // Devuelve un código 201 Created y el objeto creado en el cuerpo de la respuesta
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(guardada);
     }
 
-    // Actualiza una estadística existente
-    @PutMapping("/{id}") 
+    /**
+     * Actualiza una estadística existente.
+     *
+     * @param id ID de la estadística
+     * @param estadisticaDTO nuevos datos de la estadística
+     * @return ResponseEntity con EstadisticaDTO actualizada y código 200
+     */
+    @PutMapping("/{id}")
     public ResponseEntity<EstadisticaDTO> update(@PathVariable Long id, @Valid @RequestBody EstadisticaDTO estadisticaDTO){
-        // Llama al servicio para actualizar la entidad con los nuevos datos
-        EstadisticaDTO actualizada = estadisticaService.update(id, estadisticaDTO); 
-        // Devuelve 200 OK con la estadística actualizada
+        EstadisticaDTO actualizada = estadisticaService.update(id, estadisticaDTO);
         return ResponseEntity.ok(actualizada);
     }
 
-    // Elimina una estadística por su ID
+    /**
+     * Elimina una estadística por su ID.
+     *
+     * @param id ID de la estadística a eliminar
+     * @return ResponseEntity vacío con código 204
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id){
-        // Llama al servicio para eliminar la estadística
         estadisticaService.deleteById(id);
-        // Devuelve 204 No Content 
         return ResponseEntity.noContent().build();
     }
 }

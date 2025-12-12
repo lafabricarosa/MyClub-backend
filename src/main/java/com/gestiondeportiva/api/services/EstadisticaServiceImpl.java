@@ -17,6 +17,26 @@ import com.gestiondeportiva.api.repositories.EventoRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
+/**
+ * Implementación del servicio de gestión de estadísticas con lógica de upsert.
+ * <p>
+ * Gestiona las estadísticas de rendimiento de jugadores en eventos, implementando
+ * una estrategia de upsert para evitar duplicados. Si ya existe una estadística
+ * para un jugador en un evento determinado, actualiza los valores existentes;
+ * si no existe, crea un nuevo registro.
+ * </p>
+ *
+ * <p><strong>Validaciones implementadas:</strong></p>
+ * <ul>
+ *   <li>Verificación de existencia de jugador y evento en la BD</li>
+ *   <li>Validación de campos obligatorios (goles, tarjetas)</li>
+ *   <li>Prevención de duplicados mediante findByEventoIdAndJugadorId</li>
+ * </ul>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see EstadisticaService
+ */
 @Service
 @Transactional
 public class EstadisticaServiceImpl implements EstadisticaService {
@@ -38,12 +58,36 @@ public class EstadisticaServiceImpl implements EstadisticaService {
 
     // ================== CRUD ==================
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public List<EstadisticaDTO> findAll() {
         return estadisticaMapper.toDTOList(estadisticaRepository.findAll());
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <strong>Implementación de lógica UPSERT:</strong>
+     * </p>
+     * <ol>
+     *   <li>Valida que todos los campos obligatorios estén presentes</li>
+     *   <li>Verifica existencia del jugador y evento en la base de datos</li>
+     *   <li>Busca si ya existe una estadística para ese jugador en ese evento</li>
+     *   <li>Si existe: actualiza los valores de goles y tarjetas</li>
+     *   <li>Si no existe: crea un nuevo registro</li>
+     *   <li>Guarda y retorna el DTO con los datos actualizados</li>
+     * </ol>
+     * <p>
+     * Esta estrategia previene duplicados y asegura que siempre haya una única estadística
+     * por jugador por evento.
+     * </p>
+     *
+     * @throws IllegalArgumentException si falta algún campo obligatorio
+     * @throws EntityNotFoundException si el jugador o evento no existen
+     */
     @Override
     @Transactional
     public EstadisticaDTO save(EstadisticaDTO estadisticaDTO) {

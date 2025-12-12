@@ -19,6 +19,24 @@ import com.gestiondeportiva.api.services.EventoService;
 
 import jakarta.validation.Valid;
 
+/**
+ * Controlador REST para la gestión de eventos deportivos (partidos y entrenamientos).
+ * <p>
+ * Proporciona endpoints CRUD con control de acceso por roles. El servicio aplica
+ * filtrado adicional para que JUGADORES y ENTRENADORES solo vean eventos de su equipo.
+ * </p>
+ *
+ * <p><strong>Control de acceso:</strong></p>
+ * <ul>
+ *   <li>ADMIN: Acceso completo a todos los eventos</li>
+ *   <li>ENTRENADOR: Solo eventos de su equipo, puede crear/modificar</li>
+ *   <li>JUGADOR: Solo eventos de su equipo, solo lectura</li>
+ * </ul>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see EventoService
+ */
 @RestController
 @RequestMapping("/api/eventos")
 public class EventoController {

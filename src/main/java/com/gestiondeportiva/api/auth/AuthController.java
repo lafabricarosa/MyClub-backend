@@ -16,6 +16,32 @@ import com.gestiondeportiva.api.services.UsuarioService;
 
 import jakarta.validation.Valid;
 
+/**
+ * Controlador REST para autenticación y registro de usuarios.
+ * <p>
+ * Proporciona endpoints públicos (sin autenticación requerida) para login y registro.
+ * Genera tokens JWT para usuarios autenticados que se utilizan en llamadas posteriores a la API.
+ * </p>
+ *
+ * <p><strong>Endpoints:</strong></p>
+ * <ul>
+ *   <li>POST /api/auth/login - Autentica usuario y devuelve token JWT</li>
+ *   <li>POST /api/auth/register - Registra nuevo usuario y devuelve token JWT</li>
+ * </ul>
+ *
+ * <p><strong>Flujo de autenticación:</strong></p>
+ * <ol>
+ *   <li>Cliente envía email y contraseña</li>
+ *   <li>Spring Security verifica credenciales (contraseña con BCrypt)</li>
+ *   <li>Si es correcto, genera token JWT con rol del usuario</li>
+ *   <li>Cliente usa el token en header Authorization para llamadas posteriores</li>
+ * </ol>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see JwtUtil
+ * @see UserDetailsServiceImpl
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -35,6 +61,18 @@ public class AuthController {
         this.usuarioService = usuarioService;
     }
 
+    /**
+     * Autentica un usuario y genera un token JWT.
+     * <p>
+     * Valida las credenciales (email y contraseña) contra la base de datos.
+     * La contraseña se compara con BCrypt. Si es correcta, genera un token JWT
+     * que incluye el rol del usuario y tiene una validez configurable.
+     * </p>
+     *
+     * @param request objeto con email y password del usuario
+     * @return ResponseEntity con LoginResponse conteniendo el token JWT
+     * @throws org.springframework.security.core.AuthenticationException si las credenciales son incorrectas
+     */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
 
@@ -55,6 +93,24 @@ public class AuthController {
         return ResponseEntity.ok(new LoginResponse(token));
     }
 
+    /**
+     * Registra un nuevo usuario en el sistema y autentica automáticamente.
+     * <p>
+     * Crea un nuevo usuario con los datos proporcionados, encripta la contraseña,
+     * y genera un token JWT automáticamente sin requerir un login adicional.
+     * </p>
+     *
+     * <p><strong>Validaciones:</strong></p>
+     * <ul>
+     *   <li>Verifica que el email no esté ya registrado</li>
+     *   <li>Aplica validaciones de @Valid en RegisterRequest</li>
+     *   <li>Encripta contraseña con BCrypt antes de guardar</li>
+     * </ul>
+     *
+     * @param request datos del nuevo usuario con validaciones
+     * @return ResponseEntity con RegisterResponse (token y datos del usuario) y código 201,
+     *         o 409 si el email ya existe
+     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         try {

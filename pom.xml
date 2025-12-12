@@ -32,45 +32,95 @@
     <!-- 📦 DEPENDENCIAS -->
     <!-- ===================== -->
     <dependencies>
-        <!-- Web -->
+        <!--
+            🌐 SPRING BOOT STARTER WEB
+            Proporciona todo lo necesario para crear APIs REST:
+            - Spring MVC para controllers REST
+            - Tomcat embebido como servidor HTTP
+            - Jackson para serialización/deserialización JSON
+            - Manejo automático de peticiones HTTP (GET, POST, PUT, DELETE)
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- JPA + Hibernate -->
+        <!--
+            💾 SPRING DATA JPA + HIBERNATE
+            Capa de persistencia para acceso a base de datos:
+            - JPA (Java Persistence API) para mapeo objeto-relacional
+            - Hibernate como implementación JPA
+            - Repositorios Spring Data para consultas automáticas (findById, findAll, etc.)
+            - Gestión automática de transacciones
+            Usado en: UsuarioRepository, EquipoRepository, EstadisticaRepository, etc.
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- Actuator -->
+        <!--
+            📊 SPRING BOOT ACTUATOR
+            Endpoints de monitorización y métricas para producción:
+            - /actuator/health: Estado de salud de la aplicación
+            - /actuator/info: Información sobre la aplicación
+            - /actuator/metrics: Métricas de rendimiento
+            Útil para DevOps y monitorización en producción
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- Validación -->
+        <!--
+            ✅ SPRING BOOT STARTER VALIDATION
+            Validación de datos de entrada usando anotaciones:
+            - @NotNull, @NotEmpty, @NotBlank
+            - @Email, @Size, @Min, @Max
+            - @Pattern para expresiones regulares
+            Usado en: RegisterRequest, DTOs de entrada
+            Valida automáticamente datos antes de procesarlos en controllers
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- Base de datos MySQL -->
+        <!--
+            🐬 MYSQL CONNECTOR
+            Driver JDBC para conectar con base de datos MySQL:
+            - Permite a Hibernate/JPA comunicarse con MySQL
+            - Scope runtime: solo se necesita en ejecución, no en compilación
+            Configurado en application.properties (url, username, password)
+        -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- H2 Database para pruebas -->
+        <!--
+            🧪 H2 DATABASE (solo para tests)
+            Base de datos en memoria para pruebas de integración:
+            - No requiere instalación de MySQL para tests
+            - Se crea y destruye automáticamente en cada test
+            - Permite ejecutar tests sin afectar la base de datos real
+            Configurado en application-test.properties
+        -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- DevTools (para autorecarga en desarrollo) -->
+        <!--
+            🔄 SPRING BOOT DEVTOOLS
+            Herramientas de desarrollo para agilizar el trabajo:
+            - Autorecarga automática al detectar cambios en el código (hot reload)
+            - Desactiva caché de plantillas para ver cambios inmediatos
+            - Opcional: no se incluye en el JAR de producción
+            - Scope runtime: solo activo durante desarrollo
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -78,37 +128,89 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- MapStruct -->
+        <!--
+            🗺️ MAPSTRUCT
+            Framework de mapeo de objetos con generación de código en compilación:
+            - Convierte automáticamente Entity → DTO y viceversa
+            - Genera código Java eficiente (no usa reflexión)
+            - Evita código boilerplate repetitivo
+            Usado en: UsuarioMapper, EquipoMapper, EstadisticaMapper, etc.
+            Se requiere mapstruct-processor en maven-compiler-plugin
+        -->
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
         </dependency>
 
-        <!-- Tests -->
+        <!--
+            🧪 SPRING BOOT STARTER TEST
+            Suite completa de testing para Spring Boot:
+            - JUnit 5 para escribir y ejecutar tests
+            - Mockito para crear mocks de dependencias
+            - AssertJ para aserciones fluidas
+            - Spring Test para tests de integración con contexto
+            - @SpringBootTest, @WebMvcTest, @DataJpaTest
+            Scope test: solo disponible en tests, no en producción
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 
+        <!--
+            🔒 SPRING SECURITY TEST
+            Utilidades para testear funcionalidad de seguridad:
+            - @WithMockUser para simular usuarios autenticados en tests
+            - MockMvc configurado con Spring Security
+            - Pruebas de autorización y autenticación
+            Scope test: complementa spring-boot-starter-test
+        -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
 
+        <!--
+            🛡️ SPRING BOOT STARTER SECURITY
+            Framework de seguridad para autenticación y autorización:
+            - Integración con JWT para autenticación stateless
+            - Configuración de filtros de seguridad (JwtAuthFilter)
+            - @PreAuthorize para autorización basada en roles
+            - BCryptPasswordEncoder para encriptar contraseñas
+            - Configuración CORS para permitir peticiones desde frontend
+            Configurado en: SecurityConfig, JwtAuthFilter, SecurityUtils
+        -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <!--
+            🔑 JJWT API
+            API de Java para crear y validar tokens JWT:
+            - Define interfaces para trabajar con JWT (JSON Web Tokens)
+            - Genera tokens firmados con HS256 (HMAC-SHA256)
+            - Extrae claims (email, rol, fecha de expiración) de tokens
+            Usado en: JwtUtil para generateToken() y extractUsername()
+            Requiere jjwt-impl y jjwt-jackson para funcionar
+        -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
             <version>0.11.5</version>
         </dependency>
 
+        <!--
+            🔑 JJWT IMPLEMENTATION
+            Implementación real de la API JJWT:
+            - Contiene la lógica de firma y validación de tokens
+            - Implementa los algoritmos criptográficos (HS256, RS256, etc.)
+            - Scope runtime: solo necesario en ejecución, no en compilación
+            Usado internamente por jjwt-api
+        -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
@@ -116,6 +218,14 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!--
+            🔑 JJWT JACKSON
+            Integración de JJWT con Jackson para serialización JSON:
+            - Convierte claims del token a/desde JSON usando Jackson
+            - Maneja tipos complejos en el payload del JWT
+            - Scope runtime: solo necesario en ejecución
+            Permite incluir objetos complejos (roles, permisos) en el token
+        -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
@@ -123,7 +233,16 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Cloudinary para almacenamiento de imágenes -->
+        <!--
+            ☁️ CLOUDINARY
+            Servicio de almacenamiento en la nube para imágenes:
+            - Upload de imágenes de perfil de jugadores/entrenadores
+            - Redimensionamiento y optimización automática de imágenes
+            - CDN global para carga rápida de imágenes
+            - Transformaciones de imagen (recorte, formato, calidad)
+            Configurado en: application.properties (cloud_name, api_key, api_secret)
+            Usado en: UsuarioService para subir/actualizar fotos de perfil
+        -->
         <dependency>
             <groupId>com.cloudinary</groupId>
             <artifactId>cloudinary-http44</artifactId>
@@ -137,7 +256,28 @@
     <!-- ===================== -->
     <build>
         <plugins>
-            <!-- Compilador: configura MapStruct como procesador de anotaciones -->
+            <!--
+                ⚙️ MAVEN COMPILER PLUGIN
+                Plugin de compilación configurado para Java 21 y MapStruct:
+
+                CONFIGURACIÓN:
+                - source/target: Java 21 (versión especificada en properties)
+
+                ANNOTATION PROCESSOR PATHS:
+                - mapstruct-processor: Procesador de anotaciones de MapStruct
+                - Se ejecuta en tiempo de compilación para generar implementaciones
+                  de los mappers definidos con interfaces @Mapper
+                - Genera código Java en target/generated-sources/annotations
+
+                COMPILER ARGS:
+                - suppressGeneratorTimestamp=true: No incluye timestamp en código generado
+                  (útil para comparar código generado en control de versiones)
+                - implicit:none: Solo procesa archivos explícitamente especificados
+
+                RESULTADO:
+                Convierte interfaces como UsuarioMapper en implementaciones concretas
+                sin necesidad de escribir código de mapeo manualmente.
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -159,7 +299,25 @@
                 </configuration>
             </plugin>
 
-            <!-- Plugin de Spring Boot -->
+            <!--
+                🚀 SPRING BOOT MAVEN PLUGIN
+                Plugin oficial de Spring Boot para empaquetar y ejecutar la aplicación:
+
+                FUNCIONALIDADES:
+                - Empaqueta la aplicación en un JAR ejecutable autónomo
+                - Incluye todas las dependencias en el JAR (fat JAR)
+                - Permite ejecutar la app con: mvn spring-boot:run
+                - Configura el classpath y el manifest del JAR
+                - Añade el wrapper de Spring Boot para ejecutar con java -jar
+
+                COMANDOS MAVEN ÚTILES:
+                - mvn spring-boot:run → Ejecuta la aplicación en desarrollo
+                - mvn clean package → Genera el JAR ejecutable en target/
+                - java -jar target/api-0.0.1-SNAPSHOT.jar → Ejecuta el JAR generado
+
+                El JAR resultante incluye Tomcat embebido, por lo que no necesita
+                servidor de aplicaciones externo para ejecutarse.
+            -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

@@ -4,14 +4,39 @@ import java.time.LocalDate;
 
 import com.gestiondeportiva.api.entities.EstadoCuota;
 
+/**
+ * DTO (Data Transfer Object) para transferir datos de cuotas en respuestas API.
+ * <p>
+ * Representa una cuota de pago de un jugador, incluyendo el concepto, importe,
+ * estado de pago y fecha de pago. Incluye el nombre del jugador desnormalizado
+ * para facilitar la visualización en el frontend.
+ * </p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see com.gestiondeportiva.api.entities.Cuota
+ */
 public class CuotaDTO {
 
+    /** Identificador único de la cuota */
     private Long id;
+
+    /** ID del jugador al que pertenece la cuota */
     private Long idJugador;
+
+    /** Nombre del jugador (desnormalizado) */
     private String nombreJugador;
+
+    /** Concepto o descripción de la cuota */
     private String concepto;
+
+    /** Importe de la cuota en euros */
     private Double importe;
+
+    /** Estado de la cuota (PENDIENTE, PAGADO, EXENTO) */
     private EstadoCuota estadoCuota;
+
+    /** Fecha en la que se realizó el pago (null si está pendiente) */
     private LocalDate fechaPago;
 
     public CuotaDTO() {

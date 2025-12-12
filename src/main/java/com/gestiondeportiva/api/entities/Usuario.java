@@ -24,64 +24,109 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
+/**
+ * Entidad JPA que representa a un usuario del sistema de gestión deportiva.
+ * <p>
+ * Un usuario puede tener uno de los siguientes roles:
+ * <ul>
+ *   <li>{@code ADMIN}: Acceso completo al sistema</li>
+ *   <li>{@code ENTRENADOR}: Gestiona un equipo y sus jugadores</li>
+ *   <li>{@code JUGADOR}: Miembro de un equipo con acceso limitado</li>
+ * </ul>
+ *
+ * <p>Los jugadores tienen asociada una posición en el campo (portero, defensa,
+ * centrocampista, delantero) y pertenecen a un equipo. Los usuarios están relacionados
+ * con convocatorias, cuotas, disponibilidades y estadísticas.</p>
+ *
+ * <p>La contraseña del usuario se almacena cifrada con BCrypt y nunca se expone en
+ * las respuestas JSON gracias a la anotación {@code @JsonProperty(access = WRITE_ONLY)}.</p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see Rol
+ * @see Posicion
+ * @see Equipo
+ */
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
 
+    /** Identificador único del usuario */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Nombre del usuario (obligatorio) */
     @NotBlank(message = "El nombre no puede estar vacío")
     private String nombre;
 
+    /** Apellidos del usuario (obligatorio) */
     @NotBlank(message = "Los apellidos no pueden estar vacíos")
     private String apellidos;
 
+    /**
+     * Email del usuario (obligatorio, único).
+     * Se utiliza como username en la autenticación JWT.
+     */
     @Column(nullable = false, unique = true)
     @Email(message = "El email debe tener un formato válido")
     @NotBlank(message = "El email no puede estar vacío")
     private String email;
 
+    /**
+     * Contraseña cifrada del usuario (obligatoria).
+     * Se cifra con BCrypt y nunca se expone en respuestas JSON.
+     */
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotNull(message = "La contraseña no puede ser nula")
     private String password;
 
+    /** Rol del usuario en el sistema (ADMIN, ENTRENADOR, JUGADOR) */
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Debe indicar un rol para el usuario")
     private Rol rol;
 
+    /** Posición del jugador en el campo (solo para rol JUGADOR) */
     @Enumerated(EnumType.STRING)
     private Posicion posicion;
 
-    @NotBlank(message = "El teléfono no puede estar vacío")
+    /** Número de teléfono del usuario (9-15 dígitos) */
     @Pattern(regexp = "\\d{9,15}", message = "El teléfono debe tener entre 9 y 15 dígitos")
     private String telefono;
 
+    /** URL de la foto de perfil almacenada en Cloudinary */
     @Column(name = "foto_url")
     private String fotoUrl;
 
+    /** Equipo al que pertenece el usuario (null para ADMIN) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_equipo")
     @JsonIgnoreProperties("jugadores")
     private Equipo equipo;
 
+    /** Convocatorias en las que participa el jugador */
     @OneToMany(mappedBy = "jugador", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("jugador")
     private Set<Convocatoria> convocatorias;
 
+    /** Cuotas de pago asociadas al jugador */
     @OneToMany(mappedBy = "jugador", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("jugador")
     private Set<Cuota> cuotas;
 
+    /** Disponibilidades del jugador para eventos */
     @OneToMany(mappedBy = "jugador", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("jugador")
     private Set<Disponibilidad> disponibilidades;
 
+    /** Estadísticas del jugador en eventos */
     @OneToMany(mappedBy = "jugador", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("jugador")
     private Set<Estadistica> estadisticas;
 
+    /**
+     * Constructor por defecto que inicializa las colecciones vacías.
+     */
     public Usuario() {
         this.convocatorias = new HashSet<>();
         this.cuotas = new HashSet<>();
@@ -89,6 +134,19 @@ public class Usuario {
         this.estadisticas = new HashSet<>();
     }
 
+    /**
+     * Constructor con todos los campos.
+     *
+     * @param nombre Nombre del usuario
+     * @param apellidos Apellidos del usuario
+     * @param email Email del usuario (único en el sistema)
+     * @param password Contraseña (se debe cifrar antes de persistir)
+     * @param rol Rol del usuario en el sistema
+     * @param posicion Posición del jugador en el campo
+     * @param telefono Número de teléfono
+     * @param fotoUrl URL de la foto de perfil
+     * @param equipo Equipo al que pertenece
+     */
     public Usuario(String nombre, String apellidos, String email, String password, Rol rol, Posicion posicion,
             String telefono, String fotoUrl, Equipo equipo) {
         this();

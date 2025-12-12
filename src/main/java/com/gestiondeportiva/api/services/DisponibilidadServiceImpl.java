@@ -14,6 +14,17 @@ import com.gestiondeportiva.api.repositories.DisponibilidadRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
+/**
+ * Implementación del servicio de gestión de disponibilidad de jugadores para eventos.
+ * <p>
+ * Proporciona la lógica de negocio para gestionar la disponibilidad de los jugadores
+ * para eventos, permitiendo registrar si asisten, no asisten o tienen dudas.
+ * </p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see DisponibilidadService
+ */
 @Service
 @Transactional
 public class DisponibilidadServiceImpl implements DisponibilidadService {

@@ -21,50 +21,97 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+/**
+ * Entidad JPA que representa un evento deportivo en el sistema.
+ * <p>
+ * Un evento puede ser de tres tipos:
+ * <ul>
+ *   <li>{@code ENTRENAMIENTO}: Sesión de práctica del equipo</li>
+ *   <li>{@code PARTIDO}: Encuentro competitivo</li>
+ *   <li>{@code REUNION}: Reunión del equipo</li>
+ * </ul>
+ * </p>
+ *
+ * <p>Los eventos están asociados a un equipo específico y contienen información sobre
+ * la fecha, hora y lugar. Los jugadores pueden registrar su disponibilidad para cada
+ * evento, y el entrenador puede crear convocatorias y registrar estadísticas.</p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see TipoEvento
+ * @see Equipo
+ * @see Convocatoria
+ * @see Estadistica
+ * @see Disponibilidad
+ */
 @Entity
 @Table(name = "eventos")
 public class Evento {
 
+    /** Identificador único del evento */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** Equipo al que pertenece el evento */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_equipo", nullable = false)
     @JsonIgnoreProperties("eventos")
     private Equipo equipo;
 
+    /** Tipo de evento (ENTRENAMIENTO, PARTIDO, REUNION) */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TipoEvento tipoEvento;
 
+    /** Fecha del evento */
     @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
 
+    /** Hora del evento */
     @Column(name = "hora", nullable = false)
     private LocalTime hora;
 
+    /** Lugar donde se realiza el evento */
     private String lugar;
+
+    /** Descripción o detalles adicionales del evento */
     private String descripcion;
 
+    /** Estadísticas de los jugadores en este evento */
     @OneToMany(mappedBy = "evento", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("evento")
     private Set<Estadistica> estadisticas;
 
+    /** Disponibilidades de los jugadores para este evento */
     @OneToMany(mappedBy = "evento", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("evento")
     private Set<Disponibilidad> disponibilidades;
 
+    /** Convocatorias de jugadores para este evento */
     @OneToMany(mappedBy = "evento", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("evento")
     private Set<Convocatoria> convocatorias;
 
+    /**
+     * Constructor por defecto que inicializa las colecciones vacías.
+     */
     public Evento() {
         this.estadisticas = new HashSet<>();
         this.disponibilidades = new HashSet<>();
         this.convocatorias = new HashSet<>();
     }
 
+    /**
+     * Constructor con todos los campos principales.
+     *
+     * @param equipo Equipo al que pertenece el evento
+     * @param tipoEvento Tipo de evento
+     * @param fecha Fecha del evento
+     * @param hora Hora del evento
+     * @param lugar Lugar del evento
+     * @param descripcion Descripción del evento
+     */
     public Evento(Equipo equipo, TipoEvento tipoEvento, LocalDate fecha, LocalTime hora, String lugar, String descripcion) {
         this();
         this.equipo = equipo;

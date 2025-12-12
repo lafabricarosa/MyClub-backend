@@ -1,14 +1,45 @@
 package com.gestiondeportiva.api.dto;
 
+/**
+ * DTO (Data Transfer Object) para transferir estadísticas de jugadores en respuestas API.
+ * <p>
+ * Contiene las estadísticas de rendimiento de un jugador en un evento específico,
+ * incluyendo goles marcados y tarjetas recibidas. Incluye información desnormalizada
+ * del jugador y evento para facilitar la visualización.
+ * </p>
+ *
+ * <p><strong>Nota:</strong> El sistema implementa lógica de upsert para evitar duplicados.
+ * Si ya existe una estadística para el mismo jugador y evento, se actualiza en lugar
+ * de crear un nuevo registro.</p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see com.gestiondeportiva.api.entities.Estadistica
+ */
 public class EstadisticaDTO {
 
+    /** Identificador único de la estadística */
     private Long id;
+
+    /** ID del jugador */
     private Long idJugador;
+
+    /** Nombre del jugador (desnormalizado) */
     private String nombreJugador;
+
+    /** ID del evento */
     private Long idEvento;
+
+    /** Descripción del evento (desnormalizado) */
     private String descripcionEvento;
+
+    /** Número de goles marcados por el jugador */
     private Integer goles;
+
+    /** Número de tarjetas amarillas recibidas */
     private Integer tarjetasAmarillas;
+
+    /** Número de tarjetas rojas recibidas */
     private Integer tarjetasRojas;
 
     public EstadisticaDTO() {

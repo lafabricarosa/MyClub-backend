@@ -18,6 +18,22 @@ import com.gestiondeportiva.api.security.SecurityUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
+/**
+ * Implementación del servicio de gestión de eventos deportivos con control de acceso por equipo.
+ * <p>
+ * Implementa la lógica de negocio para eventos (partidos y entrenamientos) con las siguientes reglas:
+ * </p>
+ * <ul>
+ *   <li><strong>ADMIN:</strong> Acceso total a todos los eventos</li>
+ *   <li><strong>ENTRENADOR:</strong> Solo puede crear y gestionar eventos de su equipo</li>
+ *   <li><strong>JUGADOR:</strong> Solo puede ver eventos de su equipo, no puede crear ni modificar</li>
+ * </ul>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see EventoService
+ * @see SecurityUtils
+ */
 @Service
 @Transactional
 public class EventoServiceImpl implements EventoService {
@@ -36,6 +52,19 @@ public class EventoServiceImpl implements EventoService {
 
     // ================== CRUD ==================
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <strong>Control de acceso por equipo:</strong>
+     * </p>
+     * <ul>
+     *   <li>ADMIN: Ve todos los eventos del sistema</li>
+     *   <li>ENTRENADOR: Solo ve eventos de su equipo</li>
+     *   <li>JUGADOR: Solo ve eventos de su equipo</li>
+     * </ul>
+     *
+     * @throws AccessDeniedException si el usuario no tiene equipo asignado
+     */
     @Override
     @Transactional(readOnly = true)
     public List<EventoDTO> findAll() {
@@ -57,6 +86,21 @@ public class EventoServiceImpl implements EventoService {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * <strong>Validaciones y control de acceso:</strong>
+     * </p>
+     * <ul>
+     *   <li>Valida campos obligatorios: equipo, tipo, fecha, hora</li>
+     *   <li>ADMIN: Puede crear eventos para cualquier equipo</li>
+     *   <li>ENTRENADOR: Solo puede crear eventos para su propio equipo</li>
+     *   <li>JUGADOR: No puede crear eventos</li>
+     * </ul>
+     *
+     * @throws IllegalArgumentException si falta algún campo obligatorio
+     * @throws AccessDeniedException si el usuario no tiene permisos para crear el evento
+     */
     @Override
     @Transactional
     public EventoDTO save(EventoDTO eventoDTO) {

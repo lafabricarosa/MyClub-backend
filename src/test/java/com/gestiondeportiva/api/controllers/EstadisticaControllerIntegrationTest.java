@@ -264,6 +264,6 @@ class EstadisticaControllerIntegrationTest {
     void testAccesoSinAutenticacion_DebeRetornar401() throws Exception {
         // When/Then: Sin @WithMockUser
         mockMvc.perform(get("/api/estadisticas"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 }

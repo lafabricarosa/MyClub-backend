@@ -7,6 +7,30 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
+/**
+ * Clase que representa una solicitud de registro de nuevo usuario.
+ * <p>
+ * Contiene todos los datos necesarios para crear una cuenta de usuario en el sistema.
+ * Incluye validaciones mediante Bean Validation para asegurar la integridad de los datos.
+ * Se utiliza como objeto de entrada en el endpoint POST /api/auth/register.
+ * </p>
+ *
+ * <p><strong>Validaciones aplicadas:</strong></p>
+ * <ul>
+ *   <li>nombre: Obligatorio, no puede estar vacío</li>
+ *   <li>apellidos: Obligatorio, no puede estar vacío</li>
+ *   <li>email: Obligatorio, formato válido de email</li>
+ *   <li>password: Obligatorio, será encriptado con BCrypt antes de guardar</li>
+ *   <li>rol: Obligatorio (ADMIN, ENTRENADOR, JUGADOR)</li>
+ *   <li>posicion: Opcional, requerido solo si rol es JUGADOR</li>
+ *   <li>telefono: Obligatorio, debe contener entre 9 y 15 dígitos</li>
+ *   <li>idEquipo: Opcional, ID del equipo al que pertenece el usuario</li>
+ * </ul>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see com.gestiondeportiva.api.auth.AuthController#register(RegisterRequest)
+ */
 public class RegisterRequest {
 
     @NotBlank(message = "El nombre no puede estar vacío")

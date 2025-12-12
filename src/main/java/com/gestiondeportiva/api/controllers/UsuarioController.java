@@ -29,6 +29,31 @@ import com.gestiondeportiva.api.services.UsuarioService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 
+/**
+ * Controlador REST para la gestión de usuarios del sistema.
+ * <p>
+ * Expone endpoints para operaciones CRUD de usuarios, incluyendo funcionalidades
+ * especiales como subida de fotos de perfil y cambio de contraseña. Implementa
+ * control de acceso basado en roles mediante @PreAuthorize.
+ * </p>
+ *
+ * <p><strong>Endpoints principales:</strong></p>
+ * <ul>
+ *   <li>GET /api/usuarios - Lista todos los usuarios (ADMIN, ENTRENADOR)</li>
+ *   <li>GET /api/usuarios/{id} - Obtiene un usuario por ID</li>
+ *   <li>GET /api/usuarios/me - Obtiene datos del usuario autenticado</li>
+ *   <li>POST /api/usuarios - Crea un nuevo usuario (ADMIN, ENTRENADOR)</li>
+ *   <li>PUT /api/usuarios/{id} - Actualiza un usuario</li>
+ *   <li>DELETE /api/usuarios/{id} - Elimina un usuario (ADMIN, ENTRENADOR)</li>
+ *   <li>POST /api/usuarios/{id}/foto - Sube foto de perfil a Cloudinary</li>
+ *   <li>PUT /api/usuarios/{id}/cambiar-password - Cambia la contraseña</li>
+ * </ul>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see UsuarioService
+ * @see CloudinaryService
+ */
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
@@ -48,12 +73,30 @@ public class UsuarioController {
         this.cloudinaryService = cloudinaryService;
     }
 
+    /**
+     * Lista todos los usuarios del sistema.
+     * <p>
+     * El servicio aplica filtros según el rol:
+     * ADMIN ve todos, ENTRENADOR solo ve jugadores de su equipo.
+     * </p>
+     *
+     * @return ResponseEntity con lista de UsuarioDTO y código HTTP 200
+     */
     @PreAuthorize("hasAnyRole('ENTRENADOR','ADMIN')")
     @GetMapping
     public ResponseEntity<List<UsuarioDTO>> findAll() {
         return ResponseEntity.ok(usuarioService.findAll());
     }
 
+    /**
+     * Obtiene un usuario por su ID.
+     * <p>
+     * El servicio verifica permisos de acceso según el rol del usuario autenticado.
+     * </p>
+     *
+     * @param id ID del usuario a buscar
+     * @return ResponseEntity con UsuarioDTO y código 200 si existe, 404 si no
+     */
     @PreAuthorize("hasAnyRole('JUGADOR','ENTRENADOR', 'ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioDTO> findById(@PathVariable Long id) {
@@ -62,6 +105,16 @@ public class UsuarioController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /**
+     * Crea un nuevo usuario en el sistema.
+     * <p>
+     * La contraseña se encripta automáticamente con BCrypt.
+     * ENTRENADOR solo puede crear JUGADORES de su equipo.
+     * </p>
+     *
+     * @param dto datos del nuevo usuario con validaciones aplicadas
+     * @return ResponseEntity con UsuarioDTO creado y código HTTP 201
+     */
     @PreAuthorize("hasAnyRole('ADMIN','ENTRENADOR')")
     @PostMapping
     public ResponseEntity<UsuarioDTO> create(@Valid @RequestBody UsuarioCreateDTO dto) {
@@ -84,6 +137,15 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Obtiene los datos del usuario autenticado actualmente.
+     * <p>
+     * Extrae el email del token JWT y busca los datos completos del usuario.
+     * Útil para que el frontend obtenga información del usuario logueado.
+     * </p>
+     *
+     * @return ResponseEntity con UsuarioDTO del usuario autenticado y código 200
+     */
     @GetMapping("/me")
     public ResponseEntity<UsuarioDTO> getCurrentUser() {
         String email = SecurityContextHolder.getContext()
@@ -100,6 +162,18 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioDTO);
     }
 
+    /**
+     * Sube o actualiza la foto de perfil de un usuario en Cloudinary.
+     * <p>
+     * Si el usuario ya tiene una foto, se elimina de Cloudinary antes de subir la nueva.
+     * La imagen se almacena en la carpeta 'myclub/fotos-perfil' y se optimiza automáticamente.
+     * </p>
+     *
+     * @param id ID del usuario
+     * @param file archivo de imagen en formato MultipartFile
+     * @return ResponseEntity con UsuarioDTO actualizado incluyendo la nueva URL de foto
+     * @throws EntityNotFoundException si el usuario no existe
+     */
     @PostMapping("/{id}/foto")
     public ResponseEntity<UsuarioDTO> uploadPhoto(
             @PathVariable Long id,
@@ -124,6 +198,18 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioMapper.toDTO(actualizado));
     }
 
+    /**
+     * Cambia la contraseña de un usuario.
+     * <p>
+     * Verifica la contraseña actual antes de establecer la nueva.
+     * La nueva contraseña se encripta con BCrypt automáticamente.
+     * </p>
+     *
+     * @param id ID del usuario
+     * @param request objeto con passwordActual y passwordNueva
+     * @return ResponseEntity con código 200 si el cambio fue exitoso
+     * @throws IllegalArgumentException si la contraseña actual es incorrecta
+     */
     @PutMapping("/{id}/cambiar-password")
     public ResponseEntity<Void> changePassword(
             @PathVariable Long id,

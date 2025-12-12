@@ -5,15 +5,42 @@ import java.time.LocalTime;
 
 import com.gestiondeportiva.api.entities.TipoEvento;
 
+/**
+ * DTO (Data Transfer Object) para transferir datos de eventos en respuestas API.
+ * <p>
+ * Representa un evento del calendario deportivo (entrenamiento, partido o reunión)
+ * con toda la información necesaria para su visualización. Incluye el nombre del
+ * equipo desnormalizado para evitar consultas adicionales.
+ * </p>
+ *
+ * @author Sistema de Gestión Deportiva MyClub
+ * @version 1.0
+ * @see com.gestiondeportiva.api.entities.Evento
+ */
 public class EventoDTO {
 
+    /** Identificador único del evento */
     private Long id;
+
+    /** Tipo de evento (ENTRENAMIENTO, PARTIDO, REUNION) */
     private TipoEvento tipoEvento;
+
+    /** Descripción detallada del evento */
     private String descripcion;
+
+    /** Fecha del evento */
     private LocalDate fecha;
+
+    /** Hora de inicio del evento */
     private LocalTime hora;
+
+    /** Ubicación donde se realizará el evento */
     private String lugar;
+
+    /** ID del equipo al que pertenece el evento */
     private Long idEquipo;
+
+    /** Nombre del equipo (desnormalizado) */
     private String nombreEquipo;
 
     public EventoDTO() {
